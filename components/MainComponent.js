@@ -24,6 +24,7 @@ import {
   fetchPromotions,
   fetchPartners,
 } from "../redux/ActionCreators";
+import CampsiteInfo from "./CampsiteInfoComponent";
 
 const mapDispatchToProps = {
   fetchCampsites,
@@ -50,6 +51,7 @@ const DirectoryNavigator = createStackNavigator({
       headerTintColor: "#fff",
     }),
   },
+  CampsiteInfo: { screen: CampsiteInfo },
 });
 const AboutNavigator = createStackNavigator(
   {
