@@ -7,17 +7,20 @@ import {
   Text,
   ScrollView,
   Image,
+  Alert,
+  ToastAndroid,
 } from "react-native";
 import { createStackNavigator } from "react-navigation-stack";
 import { createDrawerNavigator, DrawerItems } from "react-navigation-drawer";
 import { createAppContainer } from "react-navigation";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "react-native-elements";
+import NetInfo from "@react-native-community/netinfo";
 import Home from "./HomeComponent";
 import Directory from "./DirectoryComponent";
 import ContactComponent from "./ContactComponent";
 import AboutComponent from "./AboutComponent";
-import Favorites from './FavoritesComponent';
+import Favorites from "./FavoritesComponent";
 import { connect } from "react-redux";
 import {
   fetchCampsites,
@@ -51,28 +54,31 @@ const LoginNavigator = createStackNavigator(
         />
       ),
     }),
-  })
+  }
+);
 
 const FavoritesNavigator = createStackNavigator(
   {
-    Favorites: { screen: Favorites }
+    Favorites: { screen: Favorites },
   },
   {
-    defaultNavigationOptions: ({navigation}) => ({
+    defaultNavigationOptions: ({ navigation }) => ({
       headerStyle: {
-        backgroundColor: '#5637DD'
+        backgroundColor: "#5637DD",
       },
-      headerTintColor: '#fff',
+      headerTintColor: "#fff",
       headerTitleStyle: {
-        color: '#fff'
+        color: "#fff",
       },
-      headerLeft: <Icon
-        name='heart'
-        type="font-awesome"
-        iconStyle={styles.stackIcon}
-        onPress={() => navigation.toggleDrawer()}
+      headerLeft: (
+        <Icon
+          name="heart"
+          type="font-awesome"
+          iconStyle={styles.stackIcon}
+          onPress={() => navigation.toggleDrawer()}
         />
-    })
+      ),
+    }),
   }
 );
 
@@ -267,16 +273,11 @@ const MainNavigator = createDrawerNavigator(
     Favorites: {
       screen: FavoritesNavigator,
       navigationOptions: {
-        drawerLabel: 'My Favorites',
-        drawerIcon: ({tintColor}) => (
-          <Icon
-              name='heart'
-              type='font-awesome'
-              size={24}
-              color={tintColor}
-          />
-        )
-      }
+        drawerLabel: "My Favorites",
+        drawerIcon: ({ tintColor }) => (
+          <Icon name="heart" type="font-awesome" size={24} color={tintColor} />
+        ),
+      },
     },
     Contact: {
       screen: ContactNavigator,
@@ -329,7 +330,46 @@ class Main extends Component {
     this.props.fetchComments();
     this.props.fetchPartners();
     this.props.fetchPromotions();
+
+    NetInfo.fetch().then((connectionInfo) => {
+      Platform.OS === "ios"
+        ? Alert.alert("Initial Network Connectivity Type:", connectionInfo.type)
+        : ToastAndroid.show(
+            "Initial Network Connectivity Type: " + connectionInfo.type,
+            ToastAndroid.LONG
+          );
+    });
+
+    this.unsubscribeNetworkInfo = NetInfo.addEventListener((connectionInfo) => {
+      this.handleConnectivityChange(connectionInfo);
+    });
   }
+
+  componentWillUnmount() {
+    this.unsubscribeNetworkInfo();
+  }
+
+  handleConnectivityChange = (connectionInfo) => {
+    let connectionMsg = "You are now connected to an active network.";
+    switch (connectionInfo.type) {
+      case "none":
+        connectionMsg = "No network connection is active.";
+        break;
+      case "unknown":
+        connectionMsg = "The network connection state is now unknown.";
+        break;
+      case "cellular":
+        connectionMsg = "You are now connected to a cellular network.";
+        break;
+      case "wifi":
+        connectionMsg = "You are now connected to a WiFi network.";
+        break;
+    }
+    Platform.OS === "ios"
+      ? Alert.alert("Connection change:", connectionMsg)
+      : ToastAndroid.show(connectionMsg, ToastAndroid.LONG);
+  };
+
   render() {
     return (
       <View

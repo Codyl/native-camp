@@ -27,15 +27,19 @@ class LoginTab extends Component {
     ),
   };
 
-  handleLogin() {
+  async handleLogin() {
     if (this.state.remember) {
-      SecureStore.setItemAsync(
-        "userinfo",
-        JSON.stringify({
-          username: this.state.username,
-          password: this.state.password,
-        })
-      ).catch((error) => console.log("Could not save user info", error));
+      try {
+        const secureSetResult = await SecureStore.setItemAsync(
+          "userinfo",
+          JSON.stringify({
+            username: this.state.username,
+            password: this.state.password,
+          })
+        );
+      } catch (error) {
+        console.log("Could not save user info", error);
+      }
     } else {
       SecureStore.deleteItemAsync("userinfo").catch((error) =>
         console.log("Could not delete user info", error)
@@ -44,15 +48,20 @@ class LoginTab extends Component {
   }
 
   componentDidMount() {
-    SecureStore.getItemAsync("userinfo").then((userdata) => {
-      const userinfo = JSON.parse(userdata);
-      if (userinfo) {
-        this.setState({ username: userinfo.username });
-        this.setState({ password: userinfo.password });
-        this.setState({ remember: true });
-      }
-    });
+    this.getSecureItem();
   }
+
+  getSecureItem = async () => {
+    const userdata = await SecureStore.getItemAsync("userinfo");
+    const userinfo = JSON.parse(userdata);
+    if (userinfo) {
+      this.setState({
+        username: userinfo.username,
+        password: userinfo.password,
+        remember: true,
+      });
+    }
+  };
 
   render() {
     return (
