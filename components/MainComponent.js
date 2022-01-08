@@ -17,6 +17,7 @@ import Home from "./HomeComponent";
 import Directory from "./DirectoryComponent";
 import ContactComponent from "./ContactComponent";
 import AboutComponent from "./AboutComponent";
+import Favorites from './FavoritesComponent';
 import { connect } from "react-redux";
 import {
   fetchCampsites,
@@ -50,6 +51,28 @@ const LoginNavigator = createStackNavigator(
         />
       ),
     }),
+  })
+
+const FavoritesNavigator = createStackNavigator(
+  {
+    Favorites: { screen: Favorites }
+  },
+  {
+    defaultNavigationOptions: ({navigation}) => ({
+      headerStyle: {
+        backgroundColor: '#5637DD'
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        color: '#fff'
+      },
+      headerLeft: <Icon
+        name='heart'
+        type="font-awesome"
+        iconStyle={styles.stackIcon}
+        onPress={() => navigation.toggleDrawer()}
+        />
+    })
   }
 );
 
@@ -240,6 +263,20 @@ const MainNavigator = createDrawerNavigator(
           <Icon name="list" type="font-awesome" size={24} color={tintColor} />
         ),
       },
+    },
+    Favorites: {
+      screen: FavoritesNavigator,
+      navigationOptions: {
+        drawerLabel: 'My Favorites',
+        drawerIcon: ({tintColor}) => (
+          <Icon
+              name='heart'
+              type='font-awesome'
+              size={24}
+              color={tintColor}
+          />
+        )
+      }
     },
     Contact: {
       screen: ContactNavigator,
