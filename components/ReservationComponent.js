@@ -8,6 +8,7 @@ import {
   Switch,
   Button,
   Modal,
+  Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Notifications from "expo-notifications";
@@ -26,9 +27,10 @@ class Reservation extends Component {
   static navigationOptions = {
     title: "Reserve Campsite",
   };
+
   handleReservation() {
     console.log(JSON.stringify(this.state));
-    this.toggleModal();
+    this.openTwoButtonAlert();
   }
 
   resetForm() {
@@ -40,6 +42,28 @@ class Reservation extends Component {
       showModal: false,
     });
   }
+
+  openTwoButtonAlert = () => {
+    Alert.alert(
+      "Begin Search",
+      `Number of Campers: ${this.state.campers}\nHike-in? ${
+        this.state.hikeIn
+      }\nDate: ${this.state.date.toLocaleDateString()}`,
+      [
+        { text: "Cancel", onPress: () => console.log("cancelled") },
+        {
+          text: "OK",
+          onPress: () => {
+            this.presentLocalNotification(
+              this.state.date.toLocaleDateString("en-US")
+            );
+            this.resetForm();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   async presentLocalNotification(date) {
     function sendNotication() {
